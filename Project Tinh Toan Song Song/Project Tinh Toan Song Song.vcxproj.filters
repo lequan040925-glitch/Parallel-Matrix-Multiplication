@@ -18,5 +18,13 @@
     <ClCompile Include="Project Tinh Toan Song Song.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TichVoHuong.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TichVoHuong.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

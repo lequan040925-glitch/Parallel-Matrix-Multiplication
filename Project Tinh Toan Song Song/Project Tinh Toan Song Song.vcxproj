@@ -141,6 +141,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Project Tinh Toan Song Song.cpp" />
+    <ClCompile Include="TichVoHuong.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="TichVoHuong.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
