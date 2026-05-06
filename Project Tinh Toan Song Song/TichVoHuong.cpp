@@ -1,4 +1,4 @@
-#include "TichVoHuong.h" // Nhúng header của chính nó
+#include "TichVoHuong.h"
 #include <iostream>
 #include <vector>
 #include <cstdlib>
@@ -9,67 +9,99 @@
 using namespace std;
 
 void chayPhanATichVoHuong() {
-    long long N = 100000000;
-    int num_threads = 4;
-
     cout << "====================================================\n";
-    cout << "   BAI TAP CHUNG: TICH VO HUONG 2 VECTOR (OPENMP)\n";
-    cout << "====================================================\n";
-    cout << "Kich thuoc Vector (N): " << N << " phan tu.\n";
-    cout << "So luong luong (Threads) su dung: " << num_threads << "\n";
-    cout << "----------------------------------------------------\n";
+    cout << "    CHAY THUC NGHIEM PHAN A - NHAP TU BAN PHIM\n";
+    cout << "====================================================\n\n";
 
-    cout << "1. Dang cap phat va khoi tao du lieu ngau nhien...\n";
-    vector<int> A(N);
-    vector<int> B(N);
+    // Khởi tạo mầm số ngẫu nhiên một lần duy nhất
     srand(time(NULL));
-    for (long long i = 0; i < N; i++) {
-        A[i] = rand() % 10 + 1;
-        B[i] = rand() % 10 + 1;
-    }
-    cout << "   -> Da khoi tao xong!\n\n";
 
-    cout << "2. Bat dau tinh toan TUAN TU (1 Core)...\n";
-    long long dot_product_seq = 0;
-    double start_seq = omp_get_wtime();
-    for (long long i = 0; i < N; i++) {
-        dot_product_seq += (long long)A[i] * B[i];
-    }
-    double end_seq = omp_get_wtime();
-    double time_seq = end_seq - start_seq;
-    cout << "   -> Ket qua: " << dot_product_seq << "\n";
-    cout << fixed << setprecision(5);
-    cout << "   -> Thoi gian (Ts): " << time_seq << " giay.\n\n";
+    char continue_test = 'y';
 
-    cout << "3. Bat dau tinh toan SONG SONG (" << num_threads << " Threads)...\n";
-    long long dot_product_par = 0;
-    omp_set_num_threads(num_threads);
-    double start_par = omp_get_wtime();
+    // Vòng lặp while để cho phép người dùng test nhiều lần liên tiếp
+    while (continue_test == 'y' || continue_test == 'Y') {
+
+        long long N;
+        int num_threads;
+
+        // 1. NGƯỜI DÙNG NHẬP KÍCH THƯỚC N
+        cout << "-> Nhap kich thuoc Vector N (Goi y: 10000000, 50000000...): ";
+        cin >> N;
+
+        if (N <= 0) {
+            cout << "[LOI] Kich thuoc phai lon hon 0. Vui long thu lai!\n\n";
+            continue;
+        }
+
+        // 2. NGƯỜI DÙNG NHẬP SỐ LUỒNG
+        cout << "-> Nhap so luong Luong (Threads) muon su dung (Goi y: 2, 4, 8...): ";
+        cin >> num_threads;
+
+        if (num_threads <= 0) {
+            cout << "[LOI] So luong phai lon hon 0. Vui long thu lai!\n\n";
+            continue;
+        }
+
+        // ==========================================
+        cout << "\nDang cap phat va khoi tao du lieu (" << N << " phan tu)...\n";
+        vector<int> A(N);
+        vector<int> B(N);
+        for (long long j = 0; j < N; j++) {
+            A[j] = rand() % 10 + 1;
+            B[j] = rand() % 10 + 1;
+        }
+
+        // ==========================================
+        cout << "1. Dang chay Tuan Tu (1 Core)...\n";
+        long long dot_product_seq = 0;
+        double start_seq = omp_get_wtime();
+
+        for (long long j = 0; j < N; j++) {
+            dot_product_seq += (long long)A[j] * B[j];
+        }
+        double time_seq = omp_get_wtime() - start_seq;
+
+        // ==========================================
+        cout << "2. Dang chay Song Song (" << num_threads << " Threads)...\n";
+        omp_set_num_threads(num_threads);
+        long long dot_product_par = 0;
+        double start_par = omp_get_wtime();
 
 #pragma omp parallel for reduction(+:dot_product_par)
-    for (long long i = 0; i < N; i++) {
-        dot_product_par += (long long)A[i] * B[i];
+        for (long long j = 0; j < N; j++) {
+            dot_product_par += (long long)A[j] * B[j];
+        }
+        double time_par = omp_get_wtime() - start_par;
+
+        // ==========================================
+        // Kiểm tra đúng đắn
+        if (dot_product_seq != dot_product_par) {
+            cout << "\n[LOI TINH TOAN] Ket qua Tuan tu va Song song KHONG KHOP!\n";
+            cout << "Tuan tu ra: " << dot_product_seq << ", Song song ra: " << dot_product_par << "\n";
+        }
+        else {
+            // TÍNH TOÁN HIỆU NĂNG VÀ IN KẾT QUẢ
+            double speedup = time_seq / time_par;
+            double efficiency = (speedup / num_threads) * 100.0;
+
+            cout << "\n---------------- KET QUA ----------------\n";
+            cout << fixed << setprecision(5);
+            cout << "Thoi gian Tuan tu (Ts) : " << time_seq << " s\n";
+            cout << "Thoi gian Song song(Tp): " << time_par << " s\n";
+            cout << "Speedup (S)            : " << speedup << " lan\n";
+            cout << "Efficiency (E)         : " << efficiency << " %\n";
+            cout << "-----------------------------------------\n";
+        }
+
+        // Giải phóng bộ nhớ trước khi test vòng lặp mới
+        A.clear(); A.shrink_to_fit();
+        B.clear(); B.shrink_to_fit();
+
+        // Hỏi người dùng có muốn tiếp tục test không
+        cout << "\nBan co muon tiep tuc test voi so khac khong? (y/n): ";
+        cin >> continue_test;
+        cout << "\n";
     }
 
-    double end_par = omp_get_wtime();
-    double time_par = end_par - start_par;
-    cout << "   -> Ket qua: " << dot_product_par << "\n";
-    cout << "   -> Thoi gian (Tp): " << time_par << " giay.\n\n";
-
-    if (dot_product_seq == dot_product_par) {
-        cout << "=> [THANH CONG] Ket qua Tuan tu va Song song khop nhau!\n\n";
-    }
-    else {
-        cout << "=> [LOI] Ket qua khong khop! Hay kiem tra lai Race Condition!\n\n";
-    }
-
-    double speedup = time_seq / time_par;
-    double efficiency = speedup / num_threads;
-
-    cout << "====================================================\n";
-    cout << "                 BANG DANH GIA                      \n";
-    cout << "====================================================\n";
-    cout << " - Speedup (He so tang toc) : " << speedup << " lan\n";
-    cout << " - Efficiency (Hieu suat)   : " << efficiency * 100 << " %\n";
-    cout << "====================================================\n";
+    cout << "=> KET THUC PHAN A.\n";
 }
