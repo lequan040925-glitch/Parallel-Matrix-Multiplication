@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Project Tinh Toan Song Song/Project Tinh Toan Song Song.vcxproj" />
+</Solution>
