@@ -203,16 +203,16 @@ void chayPhanBStrassen() {
                 B[i][j] = rand() % 5 + 1;
             }
         }
-
-        // 1. CHẠY TUẦN TỰ (Sử dụng nhân chuẩn 1 lõi để đo làm mốc nền)
-        cout << "1. Dang chay Tuan tu mốc nen (1 Core)... \n";
+// 1. CHẠY TUẦN TỰ (Sử dụng chính thuật toán Strassen nhưng chạy 1 luồng để làm mốc nền)
+        cout << "1. Dang chay Strassen Tuan tu (1 Core)... \n";
+        omp_set_num_threads(1); // Ép hệ thống chạy 1 luồng duy nhất
         double start_seq = omp_get_wtime();
-        nhanMatranChuan(A, B, C_seq, N);
+        thuatToanStrassen(A, B, C_seq, N, 0); // Gọi Strassen tuần tự
         double time_seq = omp_get_wtime() - start_seq;
 
-        // 2. CHẠY SONG SONG STRASSEN
-        cout << "2. Dang chay Song song Strassen (" << num_threads << " Threads)... \n";
-        omp_set_num_threads(num_threads);
+        // 2. CHẠY SONG SONG STRASSEN (Đa luồng OpenMP)
+        cout << "2. Dang chay Strassen Song song (" << num_threads << " Threads)... \n";
+        omp_set_num_threads(num_threads); // Bật lại đa luồng
         double start_par = omp_get_wtime();
         thuatToanStrassen(A, B, C_par, N, 0);
         double time_par = omp_get_wtime() - start_par;
